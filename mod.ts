@@ -2,6 +2,7 @@ import { asserts } from "./deps.ts";
 import { MockServerRequest } from "./src/mocks/server_request.ts";
 import { TestCase } from "./src/test_case.ts";
 import { ITestPlan, ITestSuite, ITestCase } from "./src/interfaces.ts";
+import { MockBuilder } from "./src/mock_builder.ts";
 
 /**
  * @description
@@ -184,6 +185,50 @@ export class RhumRunner {
   }
 
   /**
+   * Stub a member of an object.
+   *
+   * @param any obj
+   *     The object containing the member to stub.
+   * @param string member
+   *     The member to stub.
+   * @param any value
+   *     The return value of the stubbed member.
+   *
+   * @return this
+   *     Return this so that stub() calls can be chained.
+   */
+  public stub(obj: any, member: string, value: any): this {
+    if (!obj.calls) {
+      obj.calls = {};
+    }
+    if (!obj.calls[member]) {
+      obj.calls[member] = 0;
+    }
+
+    if (typeof value === "function") {
+      obj[member] = function () {
+        obj.calls[member]++;
+        return value();
+      };
+    } else {
+      obj[member] = value;
+    }
+    return this;
+  }
+
+  /**
+   * Get the mock builder to mock classes.
+   *
+   * @param any constructorFn
+   *     The constructor function.
+   *
+   * @return MockBuilder
+   */
+  public mock(constructorFn: any): MockBuilder {
+    return new MockBuilder(constructorFn);
+  }
+
+  /**
    * @description
    *     Define a test case and execute the test function.
    *
@@ -258,6 +303,22 @@ export class RhumRunner {
    */
   protected formatTestCaseName(name: string): string {
     let newName: string;
+    // (ebebbington) Unfortunately, due to the CI not correctly displaying output
+    // (it is  all over the place and just  completely unreadable as
+    // it doesn't play well with  our control characters), we need to
+    // display the test output differently, based on if the tests are
+    // being ran inside a CI or not. Nothing will change for the current
+    // way of doing things, but if the tests are being ran inside a CI,
+    // the format would be:
+    //    test <plan> | <suite> | <case> ... ok (2ms)
+    //    test <plan> | <suite> | <case> ... ok (2ms)
+    // Even if plans and/or suites are the same. I believe this the best
+    // way we can display the output
+    if (Deno.env.get("CI") === "true") {
+      newName =
+        `${this.passed_in_test_plan} | ${this.passed_in_test_suite} | ${name}`;
+      return newName;
+    }
     if (this.test_plan_in_progress != this.passed_in_test_plan) {
       this.test_plan_in_progress = this.passed_in_test_plan;
       this.test_suite_in_progress = this.passed_in_test_suite;
