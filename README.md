@@ -69,28 +69,16 @@ Rhum.run(); // <-- make sure to include this so that your tests run via `deno te
 ```
 
 ```
-$ deno test
+$ deno test --allow-env
+
+Compile file:///.deno.test.ts
+running 2 tests
 
 app_test.ts
     run()
         Returns true ... ok (4ms)
     close()
         Returns true ... ok (1ms)
-```
-
-Read the output:
-
-```
-Compile file:///.deno.test.ts
-running 2 tests
-
-app_test.ts
-    run()
-        Returns true ... ok (3ms)
-    close()
-        Returns true ... ok (1ms)
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out (4ms)
 ```
 
 ## Documentation
