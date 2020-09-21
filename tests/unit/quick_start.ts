@@ -1,6 +1,9 @@
 // File: app_test.ts
 
 import { Rhum } from "../../mod.ts";
+// TODO: Work In Progress, we should remove that comment later
+// Rhum.asserts.assert
+// Rhum.asserts
 
 let value = false;
 
